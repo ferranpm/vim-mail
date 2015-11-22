@@ -5,7 +5,7 @@ function! mail#get_headers(filename)
         if line =~ '^$'
             break
         elseif line =~ '\M^\s\+'
-            let headers_lines[len(headers_lines) - 1] .= line
+            let headers_lines[len(headers_lines) - 1] .= substitute(line, '\M^\s\+', ' ', '')
         else
             call add(headers_lines, line)
         endif
@@ -16,7 +16,12 @@ function! mail#get_headers(filename)
         let key_value = split(header_line, ':')
         let key = substitute(tolower(key_value[0]), '\M\s', '', 'g')
         call remove(key_value, 0)
-        let headers[key] = mail#strip_header(substitute(join(key_value, ''), '\M^\s\+', '', ''))
+        let value = substitute(join(key_value, ''), '\M^\s\+', '', '')
+        if !has_key(headers, key)
+            let headers[key] = value
+        else
+            let headers[key] .= ';'.value
+        endif
     endfor
     return headers
 endfunction
