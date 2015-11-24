@@ -56,3 +56,25 @@ function! mail#trim(string)
     let string = substitute(string, '\M"$', '', '')
     return string
 endfunction
+
+function! mail#split_recipients(text)
+    " Ensure there is no "To: "
+    let l:text = a:text
+    let l:to_list = split(a:text, ':')
+    if len(l:to_list) > 1
+        let l:text = l:to_list[1]
+    endif
+    let l:recipients = []
+    let l:items = split(l:text, ',')
+    for l:item in l:items
+        let l:address = matchstr(l:item, '\m<\zs.*\ze>')
+        if l:address =~ '^$'
+            let l:address = l:item
+            let l:name = split(l:address, '@')[0]
+        else
+            let l:name = matchstr(l:item, '\m.*\ze<.*>')
+        endif
+        call add(l:recipients, {'name': l:name, 'address': l:address})
+    endfor
+    return l:recipients
+endfunction
