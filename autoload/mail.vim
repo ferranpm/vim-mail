@@ -105,3 +105,17 @@ function! mail#get_parts(filename)
     endfor
     return l:list
 endfunction
+
+function! mail#get_part_headers(part)
+    let l:headers = {}
+    for l:line in a:part
+        if l:line =~ '\m^$'
+            break
+        endif
+        let l:arr = split(l:line, ':')
+        let l:key = tolower(l:arr[0])
+        call remove(l:arr, 0)
+        let l:headers[l:key] = join(l:arr, ':')
+    endfor
+    return l:headers
+endfunction
