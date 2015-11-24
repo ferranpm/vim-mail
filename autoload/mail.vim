@@ -78,3 +78,30 @@ function! mail#split_recipients(text)
     endfor
     return l:recipients
 endfunction
+
+function! mail#get_parts(filename)
+    let l:headers = mail#get_headers(a:filename)
+    let l:boundary = mail#get_boundary(l:headers)
+    let l:lines = readfile(expand(a:filename))
+    " Erase headers and first boundary
+    for l:line in l:lines
+        call remove(l:lines, 0)
+        if l:line =~ '\m^--'.l:boundary.'$'
+            break
+        endif
+    endfor
+    let l:list = []
+    let l:part = []
+    for l:line in l:lines
+        if l:line =~ '\m^--'.l:boundary
+            call add(l:list, l:part)
+            let l:part = []
+            if l:line =~ '^--'.l:boundary.'--$'
+                break
+            endif
+        else
+            call add(l:part, l:line)
+        endif
+    endfor
+    return l:list
+endfunction
