@@ -39,27 +39,16 @@ function! mail#strip_header(header)
     let dict = {'misc': []}
     for part in parts
         if part =~ '='
-            let key_value = split(part, '=\zs', 1)
-            let key = mail#trim(key_value[0])
+            let key_value = split(part, '=')
+            let key = key_value[0]
             call remove(key_value, 0)
-            let value = mail#trim(join(key_value, ''))
+            let value = substitute(matchstr(join(key_value, '='), '\m^\s*"\?\zs\S\+\ze"\?'), '"$', '')
             let dict[key] = value
         else
             call add(dict['misc'], part)
         endif
     endfor
     return dict
-endfunction
-
-function! mail#trim(string)
-    let string = a:string
-    let string = substitute(string, '\M^\s\+', '', '')
-    let string = substitute(string, '\M\s\+$', '', '')
-    let string = substitute(string, '\M^=', '', '')
-    let string = substitute(string, '\M=$', '', '')
-    let string = substitute(string, '\M^"', '', '')
-    let string = substitute(string, '\M"$', '', '')
-    return string
 endfunction
 
 function! mail#split_recipients(text)
