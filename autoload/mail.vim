@@ -1,35 +1,35 @@
 function! mail#get_headers(filename)
-    let lines = readfile(expand(a:filename))
-    let headers_lines = mail#get_headers_lines(lines)
+    let l:lines = readfile(expand(a:filename))
+    let l:headers_lines = mail#get_headers_lines(lines)
 
-    let headers = {}
-    for header_line in headers_lines
-        let key_value = split(header_line, '\m:\s*')
-        let key = substitute(tolower(key_value[0]), '\M\s', '', 'g')
-        call remove(key_value, 0)
-        let value = substitute(join(key_value, ': '), '\M^\s\+', '', '')
-        if !has_key(headers, key)
-            let headers[key] = value
+    let l:headers = {}
+    for l:header_line in l:headers_lines
+        let l:key_value = split(l:header_line, '\m:\s*')
+        let l:key = substitute(tolower(l:key_value[0]), '\M\s', '', 'g')
+        call remove(l:key_value, 0)
+        let l:value = substitute(join(l:key_value, ': '), '\M^\s\+', '', '')
+        if !has_key(l:headers, l:key)
+            let l:headers[l:key] = l:value
         else
-            let headers[key] .= ';'.value
+            let l:headers[l:key] .= ';'.l:value
         endif
     endfor
-    if has_key(headers, 'content-type')
-        let headers['content-type'] = mail#strip_header(headers['content-type'])
+    if has_key(l:headers, 'content-type')
+        let l:headers['content-type'] = mail#strip_header(l:headers['content-type'])
     endif
-    if has_key(headers, 'from')
-        let headers['from'] = mail#split_recipients(headers['from'])
+    if has_key(l:headers, 'from')
+        let l:headers['from'] = mail#split_recipients(l:headers['from'])
     endif
-    if has_key(headers, 'to')
-        let headers['to'] = mail#split_recipients(headers['to'])
+    if has_key(l:headers, 'to')
+        let l:headers['to'] = mail#split_recipients(l:headers['to'])
     endif
-    if has_key(headers, 'cc')
-        let headers['cc'] = mail#split_recipients(headers['cc'])
+    if has_key(l:headers, 'cc')
+        let l:headers['cc'] = mail#split_recipients(l:headers['cc'])
     endif
-    if has_key(headers, 'bcc')
-        let headers['bcc'] = mail#split_recipients(headers['bcc'])
+    if has_key(l:headers, 'bcc')
+        let l:headers['bcc'] = mail#split_recipients(l:headers['bcc'])
     endif
-    return headers
+    return l:headers
 endfunction
 
 function! mail#get_headers_lines(lines)
@@ -47,23 +47,23 @@ function! mail#get_headers_lines(lines)
 endfunction
 
 function! mail#strip_header(header)
-    let parts = split(a:header, '\m;\s*')
-    if len(parts) == 1
+    let l:parts = split(a:header, '\m;\s*')
+    if len(l:parts) == 1
         return a:header
     endif
-    let dict = {'misc': []}
-    for part in parts
-        if part =~ '='
-            let key_value = split(part, '=')
-            let key = key_value[0]
-            call remove(key_value, 0)
-            let value = substitute(matchstr(join(key_value, '='), '\m^\s*"\?\zs\S\+\ze"\?'), '"$', '', '')
-            let dict[key] = value
+    let l:dict = {'misc': []}
+    for l:part in l:parts
+        if l:part =~ '='
+            let l:key_value = split(l:part, '=')
+            let l:key = l:key_value[0]
+            call remove(l:key_value, 0)
+            let l:value = substitute(matchstr(join(l:key_value, '='), '\m^\s*"\?\zs\S\+\ze"\?'), '"$', '', '')
+            let l:dict[l:key] = l:value
         else
-            call add(dict['misc'], part)
+            call add(l:dict['misc'], l:part)
         endif
     endfor
-    return dict
+    return l:dict
 endfunction
 
 function! mail#split_recipients(text)
