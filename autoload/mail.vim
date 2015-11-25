@@ -88,6 +88,20 @@ function! mail#strip_recipients(text)
     return l:recipients
 endfunction
 
+function! mail#join_recipients(recipients)
+    let l:line = ''
+    let l:first = 1
+    for l:recipient in a:recipients
+        if l:first
+            let l:first = 0
+        else
+            let l:line .= ', '
+        endif
+        let l:line .= l:recipient['name'].' <'.l:recipient['address'].'>'
+    endfor
+    return l:line
+endfunction
+
 function! mail#get_parts(file_lines)
     let l:file_lines = a:file_lines
     let l:headers = mail#parse_headers(l:file_lines)

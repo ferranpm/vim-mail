@@ -30,6 +30,15 @@ function! TestStripRecipients()
     call VUAssertEquals(mail#strip_recipients(l:quoted), l:quoted_expected)
 endfunction
 
+function! TestJoinRecipients()
+    let l:normal = [{
+                \ 'name': 'Pepito de los Palotes',
+                \ 'address': 'pepito.palotes@gmail.com'
+                \ }]
+    let l:normal_expected = 'Pepito de los Palotes <pepito.palotes@gmail.com>'
+    call VUAssertEquals(mail#join_recipients(l:normal), l:normal_expected)
+endfunction
+
 function! TestStripHeader()
     let l:content_type = 'multipart/alternative; boundary="001a11c36780a5823d051ae6d1cd" '
     let l:content_type_expected = { 'misc': ['multipart/alternative'], 'boundary': '001a11c36780a5823d051ae6d1cd' }
