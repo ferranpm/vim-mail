@@ -114,3 +114,16 @@ function! mail#get_parts(file_lines)
     endfor
     return l:list
 endfunction
+
+function! mail#get_body(lines)
+    let l:body = []
+    let l:is_body = 0
+    for l:line in a:lines
+        if l:is_body
+            call add(l:body, l:line)
+        elseif l:line =~ '\m^$'
+            let l:is_body = 1
+        endif
+    endfor
+    return l:body
+endfunction

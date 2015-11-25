@@ -72,6 +72,24 @@ function! TestGetHeadersLines()
     call VUAssertEquals(mail#get_headers_lines(l:mail), l:mail_expected)
 endfunction
 
+function! TestGetBody()
+    let l:mail = [
+                \ 'Subject: Re: This is our response',
+                \ 'From: Boba Fett <boba.fett@gmail.com>',
+                \ 'To: Pepito de los Palotes <pepito.palotes@gmail.com>',
+                \ 'Content-Type: multipart/alternative;',
+                \ '     boundary=047d7b41cdd6fb0c5d0525533202',
+                \ '',
+                \ 'This is the mail',
+                \ 'With multiple lines and all'
+                \ ]
+    let l:mail_expected = [
+                \ 'This is the mail',
+                \ 'With multiple lines and all'
+                \ ]
+    call VUAssertEquals(mail#get_body(l:mail), l:mail_expected)
+endfunction
+
 function! TestParsePartHeaders()
     " function! mail#get_part_headers(part)
 endfunction
