@@ -1,15 +1,6 @@
 function! mail#get_headers(filename)
     let lines = readfile(expand(a:filename))
-    let headers_lines = []
-    for line in lines
-        if line =~ '^$'
-            break
-        elseif line =~ '\M^\s\+'
-            let headers_lines[len(headers_lines) - 1] .= substitute(line, '\M^\s\+', ' ', '')
-        else
-            call add(headers_lines, line)
-        endif
-    endfor
+    let headers_lines = mail#get_headers_lines(lines)
 
     let headers = {}
     for header_line in headers_lines
@@ -24,6 +15,20 @@ function! mail#get_headers(filename)
         endif
     endfor
     return headers
+endfunction
+
+function! mail#get_headers_lines(lines)
+    let l:headers_lines = []
+    for l:line in a:lines
+        if l:line =~ '^$'
+            break
+        elseif l:line =~ '\M^\s\+'
+            let headers_lines[len(l:headers_lines) - 1] .= substitute(l:line, '\M^\s\+', ' ', '')
+        else
+            call add(l:headers_lines, l:line)
+        endif
+    endfor
+    return l:headers_lines
 endfunction
 
 function! mail#strip_header(header)
@@ -107,11 +112,9 @@ function! mail#get_parts(filename)
 endfunction
 
 function! mail#get_part_headers(part)
+    let l:headers_lines = mail#get_headers_lines(a:part)
     let l:headers = {}
-    for l:line in a:part
-        if l:line =~ '\m^$'
-            break
-        endif
+    for l:line in l:headers_lines
         let l:arr = split(l:line, ':')
         let l:key = tolower(l:arr[0])
         call remove(l:arr, 0)
