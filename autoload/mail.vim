@@ -86,7 +86,7 @@ endfunction
 
 function! mail#get_parts(filename)
     let l:headers = mail#get_headers(a:filename)
-    let l:boundary = mail#get_boundary(l:headers)
+    let l:boundary = l:headers['content-type']['boundary']
     let l:lines = readfile(expand(a:filename))
     " Erase headers and first boundary
     for l:line in l:lines
