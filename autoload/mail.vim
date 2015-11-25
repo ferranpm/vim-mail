@@ -4,7 +4,7 @@ function! mail#get_headers(filename)
 
     let headers = {}
     for header_line in headers_lines
-        let key_value = split(header_line, ': ')
+        let key_value = split(header_line, '\m:\s*')
         let key = substitute(tolower(key_value[0]), '\M\s', '', 'g')
         call remove(key_value, 0)
         let value = substitute(join(key_value, ': '), '\M^\s\+', '', '')
@@ -32,7 +32,7 @@ function! mail#get_headers_lines(lines)
 endfunction
 
 function! mail#strip_header(header)
-    let parts = split(a:header, ';')
+    let parts = split(a:header, '\m;\s*')
     if len(parts) == 1
         return a:header
     endif
@@ -42,7 +42,7 @@ function! mail#strip_header(header)
             let key_value = split(part, '=')
             let key = key_value[0]
             call remove(key_value, 0)
-            let value = substitute(matchstr(join(key_value, '='), '\m^\s*"\?\zs\S\+\ze"\?'), '"$', '')
+            let value = substitute(matchstr(join(key_value, '='), '\m^\s*"\?\zs\S\+\ze"\?'), '"$', '', '')
             let dict[key] = value
         else
             call add(dict['misc'], part)
@@ -54,19 +54,20 @@ endfunction
 function! mail#split_recipients(text)
     " Ensure there is no "To: "
     let l:text = a:text
-    let l:to_list = split(a:text, ': ')
+    let l:to_list = split(a:text, '\m:\s*')
     if len(l:to_list) > 1
-        let l:text = l:to_list[1]
+        call remove(l:to_list, 0)
+        let l:text = join(l:to_list, ': ')
     endif
     let l:recipients = []
     let l:items = split(l:text, ',')
     for l:item in l:items
-        let l:address = matchstr(l:item, '\m<\zs.*\ze>')
-        if l:address =~ '^$'
+        let l:address = matchstr(l:item, '\m<\zs\S*\ze>')
+        if l:address =~ '\m^$'
             let l:address = l:item
             let l:name = split(l:address, '@')[0]
         else
-            let l:name = matchstr(l:item, '\m.*\ze<.*>')
+            let l:name = substitute(matchstr(l:item, '\m^\s*"\?\zs.*\ze<.*>'), '"\?\s*$', '', '')
         endif
         call add(l:recipients, {'name': l:name, 'address': l:address})
     endfor
@@ -104,7 +105,7 @@ function! mail#get_part_headers(part)
     let l:headers_lines = mail#get_headers_lines(a:part)
     let l:headers = {}
     for l:line in l:headers_lines
-        let l:arr = split(l:line, ': ')
+        let l:arr = split(l:line, '\m:\s*')
         let l:key = tolower(l:arr[0])
         call remove(l:arr, 0)
         let l:headers[l:key] = join(l:arr, ': ')
