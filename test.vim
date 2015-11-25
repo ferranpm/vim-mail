@@ -57,7 +57,7 @@ function! TestGetHeadersLines()
                 \ 'Content-Type: multipart/alternative;',
                 \ '     boundary=047d7b41cdd6fb0c5d0525533202',
                 \ '',
-                \ 'This is the mail'
+                \ 'This is the mail',
                 \ 'With multiple lines and all'
                 \ ]
     let l:mail_expected = [
