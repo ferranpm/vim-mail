@@ -1,0 +1,36 @@
+Delivered-To: bobby.tables@gmail.com
+Received: by 10.37.56.88 with SMTP id f85csp2755973yba;
+        Wed, 15 Jul 2015 02:45:48 -0700 (PDT)
+X-Received: by 10.112.137.1 with SMTP id qe1mr3130858lbb.22.1436953547490;
+        Wed, 15 Jul 2015 02:45:47 -0700 (PDT)
+Return-Path: <boba.fett@gmail.com>
+Received: by mail-lb0-x22c.google.com with SMTP id zr7so19790528lbb.1;
+        Wed, 15 Jul 2015 02:45:45 -0700 (PDT)
+MIME-Version: 1.0
+X-Received: by 10.152.42.230 with SMTP id r6mr2901156lal.30.1436953545637;
+ Wed, 15 Jul 2015 02:45:45 -0700 (PDT)
+Received: by 10.112.158.228 with HTTP; Wed, 15 Jul 2015 02:45:45 -0700 (PDT)
+Date: Wed, 15 Jul 2015 11:45:45 +0200
+Subject: Re: This is our response
+From: Boba Fett <boba.fett@gmail.com>
+To: Pepito de los Palotes <pepito.palotes@gmail.com>
+Cc: John Smith <smashjohn@gmail.com>, Robert Drop Table <bobby.tables@gmail.com>
+Content-Type: multipart/alternative; boundary=047d7b41cdd6fb0c5d0525533202
+
+--047d7b41cdd6fb0c5d0525533202
+Content-Type: text/plain; charset=UTF-8
+
+This is another useful mail
+
+For developing this <https://github.com/ferranpm/vim-mail>
+
+-- 
+Ferran Pelayo Monfort
+
+--047d7b41cdd6fb0c5d0525533202
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr"><div>This is another useful mail<br><br></div>For developing <a href="https://github.com/ferranpm/vim-mail">this</a><br clear="all"><div><div><div><br>-- <br><div class="gmail_signature">Ferran Pelayo Monfort</div>
+</div></div></div></div>
+
+--047d7b41cdd6fb0c5d0525533202--
