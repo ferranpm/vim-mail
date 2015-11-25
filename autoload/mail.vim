@@ -4,10 +4,10 @@ function! mail#get_headers(filename)
 
     let headers = {}
     for header_line in headers_lines
-        let key_value = split(header_line, ':')
+        let key_value = split(header_line, ': ')
         let key = substitute(tolower(key_value[0]), '\M\s', '', 'g')
         call remove(key_value, 0)
-        let value = substitute(join(key_value, ''), '\M^\s\+', '', '')
+        let value = substitute(join(key_value, ': '), '\M^\s\+', '', '')
         if !has_key(headers, key)
             let headers[key] = value
         else
@@ -54,7 +54,7 @@ endfunction
 function! mail#split_recipients(text)
     " Ensure there is no "To: "
     let l:text = a:text
-    let l:to_list = split(a:text, ':')
+    let l:to_list = split(a:text, ': ')
     if len(l:to_list) > 1
         let l:text = l:to_list[1]
     endif
@@ -104,10 +104,10 @@ function! mail#get_part_headers(part)
     let l:headers_lines = mail#get_headers_lines(a:part)
     let l:headers = {}
     for l:line in l:headers_lines
-        let l:arr = split(l:line, ':')
+        let l:arr = split(l:line, ': ')
         let l:key = tolower(l:arr[0])
         call remove(l:arr, 0)
-        let l:headers[l:key] = join(l:arr, ':')
+        let l:headers[l:key] = join(l:arr, ': ')
     endfor
     return l:headers
 endfunction
