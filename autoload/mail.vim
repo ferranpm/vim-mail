@@ -1,8 +1,6 @@
-function! mail#get_headers(filename)
-    let l:lines = readfile(expand(a:filename))
-    let l:headers_lines = mail#get_headers_lines(lines)
-
+function! mail#parse_headers(lines)
     let l:headers = {}
+    let l:headers_lines = mail#get_headers_lines(a:lines)
     for l:header_line in l:headers_lines
         let l:key_value = split(l:header_line, '\m:\s*')
         let l:key = substitute(tolower(l:key_value[0]), '\M\s', '', 'g')
@@ -14,27 +12,19 @@ function! mail#get_headers(filename)
             let l:headers[l:key] .= ';'.l:value
         endif
     endfor
-    if has_key(l:headers, 'content-type')
-        let l:headers['content-type'] = mail#strip_header(l:headers['content-type'])
-    endif
-    if has_key(l:headers, 'from')
-        let l:headers['from'] = mail#split_recipients(l:headers['from'])
-    endif
-    if has_key(l:headers, 'to')
-        let l:headers['to'] = mail#split_recipients(l:headers['to'])
-    endif
-    if has_key(l:headers, 'cc')
-        let l:headers['cc'] = mail#split_recipients(l:headers['cc'])
-    endif
-    if has_key(l:headers, 'bcc')
-        let l:headers['bcc'] = mail#split_recipients(l:headers['bcc'])
-    endif
+    call map(l:headers, 'mail#strip_header(v:key,v:val)')
     return l:headers
 endfunction
 
 function! mail#get_headers_lines(lines)
+    let l:lines = []
+    if type(a:lines) == type("")
+        let l:lines = split(a:lines, '\n')
+    else
+        let l:lines = a:lines
+    endif
     let l:headers_lines = []
-    for l:line in a:lines
+    for l:line in l:lines
         if l:line =~ '^$'
             break
         elseif l:line =~ '\M^\s\+'
@@ -46,7 +36,16 @@ function! mail#get_headers_lines(lines)
     return l:headers_lines
 endfunction
 
-function! mail#strip_header(header)
+function! mail#strip_header(key, header)
+    if a:key == 'content-type'
+        return mail#strip_key_value(a:header)
+    elseif a:key == 'from' || a:key == 'to' || a:key == 'cc' || a:key == 'bcc'
+        return mail#strip_recipients(a:header)
+    endif
+    return a:header
+endfunction
+
+function! mail#strip_key_value(header)
     let l:parts = split(a:header, '\m;\s*')
     if len(l:parts) == 1
         return a:header
@@ -66,7 +65,7 @@ function! mail#strip_header(header)
     return l:dict
 endfunction
 
-function! mail#split_recipients(text)
+function! mail#strip_recipients(text)
     " Ensure there is no "To: "
     let l:text = a:text
     let l:to_list = split(a:text, '\m:\s*')
@@ -89,20 +88,20 @@ function! mail#split_recipients(text)
     return l:recipients
 endfunction
 
-function! mail#get_parts(filename)
-    let l:headers = mail#get_headers(a:filename)
+function! mail#get_parts(file_lines)
+    let l:file_lines = a:file_lines
+    let l:headers = mail#parse_headers(l:file_lines)
     let l:boundary = l:headers['content-type']['boundary']
-    let l:lines = readfile(expand(a:filename))
     " Erase headers and first boundary
-    for l:line in l:lines
-        call remove(l:lines, 0)
+    for l:line in l:file_lines
+        call remove(l:file_lines, 0)
         if l:line =~ '\m^--'.l:boundary.'$'
             break
         endif
     endfor
     let l:list = []
     let l:part = []
-    for l:line in l:lines
+    for l:line in l:file_lines
         if l:line =~ '\m^--'.l:boundary
             call add(l:list, l:part)
             let l:part = []
@@ -114,16 +113,4 @@ function! mail#get_parts(filename)
         endif
     endfor
     return l:list
-endfunction
-
-function! mail#get_part_headers(part)
-    let l:headers_lines = mail#get_headers_lines(a:part)
-    let l:headers = {}
-    for l:line in l:headers_lines
-        let l:arr = split(l:line, '\m:\s*')
-        let l:key = tolower(l:arr[0])
-        call remove(l:arr, 0)
-        let l:headers[l:key] = join(l:arr, ': ')
-    endfor
-    return l:headers
 endfunction

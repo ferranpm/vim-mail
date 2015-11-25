@@ -1,25 +1,25 @@
 let s:sample_mail = 'sample_mail'
 
 function! TestParseHeaders()
-    let l:result = mail#get_headers(s:sample_mail)
+    let l:result = mail#parse_headers(readfile(expand(s:sample_mail)))
     call VUAssertEquals(l:result['subject'], 'Re: This is our response')
     call VUAssertEquals(l:result['mime-version'], '1.0')
 endfunction
 
-function! TestSplitRecipients()
+function! TestStripRecipients()
     let l:normal = 'To: Pepito de los Palotes <pepito.palotes@gmail.com>'
     let l:normal_expected = [{
                 \ 'name': 'Pepito de los Palotes',
                 \ 'address': 'pepito.palotes@gmail.com'
                 \ }]
-    call VUAssertEquals(mail#split_recipients(l:normal), l:normal_expected)
+    call VUAssertEquals(mail#strip_recipients(l:normal), l:normal_expected)
 
     let l:quoted = 'From: "Juan Manches" <juanmanches@gmail.com>'
     let l:quoted_expected = [{
                 \ 'name': 'Juan Manches',
                 \ 'address': 'juanmanches@gmail.com'
                 \ }]
-    call VUAssertEquals(mail#split_recipients(l:quoted), l:quoted_expected)
+    call VUAssertEquals(mail#strip_recipients(l:quoted), l:quoted_expected)
 
     let l:mixed = 'From: "Juan Manches" <juanmanches@gmail.com>, Pepito de los Palotes <pepito.palotes@gmail.com>, "John Smith" <smashjohn@gmail.com>'
     let l:mixed_expected = [
@@ -27,25 +27,28 @@ function! TestSplitRecipients()
                 \ { 'name': 'Pepito de los Palotes', 'address': 'pepito.palotes@gmail.com' },
                 \ { 'name': 'John Smith', 'address': 'smashjohn@gmail.com' }
                 \ ]
-    call VUAssertEquals(mail#split_recipients(l:quoted), l:quoted_expected)
+    call VUAssertEquals(mail#strip_recipients(l:quoted), l:quoted_expected)
 endfunction
 
 function! TestStripHeader()
     let l:content_type = 'multipart/alternative; boundary="001a11c36780a5823d051ae6d1cd" '
     let l:content_type_expected = { 'misc': ['multipart/alternative'], 'boundary': '001a11c36780a5823d051ae6d1cd' }
-    call VUAssertEquals(mail#strip_header(l:content_type), l:content_type_expected)
+    call VUAssertEquals(mail#strip_header('content-type', l:content_type), l:content_type_expected)
 
     let l:content_type_2 = 'multipart/alternative; boundary="----=_Part_103_790153692.1448382644499"'
     let l:content_type_2_expected = { 'misc': ['multipart/alternative'], 'boundary': '----=_Part_103_790153692.1448382644499' }
-    call VUAssertEquals(mail#strip_header(l:content_type_2), l:content_type_2_expected)
+    call VUAssertEquals(mail#strip_header('content-type', l:content_type_2), l:content_type_2_expected)
 
     let l:to = '"John Smith" <smashjohn@gmail.com>, Robert Drop Table <bobby.tables@gmail.com>'
-    let l:to_expected = '"John Smith" <smashjohn@gmail.com>, Robert Drop Table <bobby.tables@gmail.com>'
-    call VUAssertEquals(mail#strip_header(l:to), l:to_expected)
+    let l:to_expected = [
+                \ { 'name': 'John Smith', 'address': 'smashjohn@gmail.com' },
+                \ { 'name': 'Robert Drop Table', 'address': 'bobby.tables@gmail.com' }
+                \ ]
+    call VUAssertEquals(mail#strip_header('to', l:to), l:to_expected)
 endfunction
 
 function! TestGetParts()
-    let l:parts = mail#get_parts(s:sample_mail)
+    let l:parts = mail#get_parts(readfile(expand(s:sample_mail)))
     call VUAssertEquals(len(l:parts), 2)
 endfunction
 
