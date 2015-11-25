@@ -14,6 +14,21 @@ function! mail#get_headers(filename)
             let headers[key] .= ';'.value
         endif
     endfor
+    if has_key(headers, 'content-type')
+        let headers['content-type'] = mail#strip_header(headers['content-type'])
+    endif
+    if has_key(headers, 'from')
+        let headers['from'] = mail#split_recipients(headers['from'])
+    endif
+    if has_key(headers, 'to')
+        let headers['to'] = mail#split_recipients(headers['to'])
+    endif
+    if has_key(headers, 'cc')
+        let headers['cc'] = mail#split_recipients(headers['cc'])
+    endif
+    if has_key(headers, 'bcc')
+        let headers['bcc'] = mail#split_recipients(headers['bcc'])
+    endif
     return headers
 endfunction
 
