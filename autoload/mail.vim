@@ -102,20 +102,20 @@ function! mail#join_recipients(recipients)
     return l:line
 endfunction
 
-function! mail#get_parts(file_lines)
-    let l:file_lines = a:file_lines
-    let l:headers = mail#parse_headers(l:file_lines)
+function! mail#get_parts(lines)
+    let l:lines = a:lines
+    let l:headers = mail#parse_headers(l:lines)
     let l:boundary = l:headers['content-type']['boundary']
     " Erase headers and first boundary
-    for l:line in l:file_lines
-        call remove(l:file_lines, 0)
+    for l:line in l:lines
+        call remove(l:lines, 0)
         if l:line =~ '\m^--'.l:boundary.'$'
             break
         endif
     endfor
     let l:list = []
     let l:part = []
-    for l:line in l:file_lines
+    for l:line in l:lines
         if l:line =~ '\m^--'.l:boundary
             call add(l:list, l:part)
             let l:part = []
