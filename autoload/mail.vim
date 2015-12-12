@@ -141,3 +141,66 @@ function! mail#get_body(lines)
     endfor
     return l:body
 endfunction
+
+function! mail#get_plain_text(lines)
+    let l:headers = mail#parse_headers(a:lines)
+    if !has_key(l:headers, 'content-type')
+        return mail#get_body(a:lines)
+    endif
+    let l:content_type = l:headers['content-type']['misc'][0]
+    if l:content_type == 'text/plain'
+        return mail#get_plain_text_text_plain(a:lines)
+    elseif l:content_type == 'multipart/alternative'
+        return mail#get_plain_text_multipart_alternative(mail#get_parts(a:lines))
+    elseif l:content_type == 'multipart/mixed'
+        return mail#get_plain_text_multipart_mixed(mail#get_parts(a:lines))
+    elseif l:content_type == 'multipart/related'
+        return mail#get_plain_text_multipart_related(mail#get_parts(a:lines))
+    else
+        return 'mail#get_plain_text unknown content type'
+    endif
+    return 'mail#get_plain_text should not return this'
+endfunction
+
+function! mail#get_plain_text_text_plain(lines)
+    let l:headers = mail#parse_headers(a:lines)
+    if !has_key(l:headers, 'content-transfer-encoding')
+        return mail#get_body(a:lines)
+    endif
+    let l:content_transfer_encoding = l:headers['content-transfer-encoding']['misc'][0]
+    if l:content_transfer_encoding == 'quoted-printable' || l:content_transfer_encoding == 'q'
+        return mail#decode_lines(mail#get_body(a:lines), 'qp')
+    elseif l:content_transfer_encoding == 'base64' || l:content_transfer_encoding == 'b64'
+        return mail#decode_lines(mail#get_body(a:lines), 'b64')
+    endif
+endfunction
+
+function! mail#get_plain_text_multipart_mixed(parts)
+    return 'TODO: mail#get_plain_text_multipart_mixed'
+endfunction
+
+function! mail#get_plain_text_multipart_alternative(parts)
+    for l:part in a:parts
+        let l:headers = mail#parse_headers(l:part)
+        if !has_key(l:headers, 'content-type')
+            return 'mail#get_plain_text_multipart_alternative should not return this'
+            return mail#get_body(l:part)
+        endif
+        let l:content_type = l:headers['content-type']['misc'][0]
+        if l:content_type == 'text/plain'
+            return mail#get_plain_text_text_plain(l:part)
+        endif
+    endfor
+    return 'mail#get_plain_text_multipart_alternative should not return this'
+endfunction
+
+function! mail#get_plain_text_multipart_related(parts)
+    return 'TODO: mail#get_plain_text_multipart_related'
+endfunction
+
+function! mail#decode_lines(lines, format)
+    let l:filename = tempname()
+    call writefile(a:lines, l:filename)
+    call system('recode /'.a:format.' '.l:filename)
+    return readfile(l:filename)
+endfunction
