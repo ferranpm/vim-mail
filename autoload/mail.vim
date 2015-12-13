@@ -65,6 +65,26 @@ function! mail#strip_key_value(header)
     return l:dict
 endfunction
 
+function! mail#split_recipients(text)
+    let l:quoted = 0
+    let l:recipients = []
+    let l:recipient = ''
+    for l:index in range(len(a:text))
+        let l:char = a:text[l:index]
+        if l:char == '"'
+            let l:quoted = 1 - l:quoted
+        elseif l:char == ',' && !l:quoted
+            call add(l:recipients, l:recipient)
+            let l:quoted = 0 " should be 0 already but just in case
+            let l:recipient = ''
+        else
+            let l:recipient .= l:char
+        endif
+    endfor
+    call add(l:recipients, l:recipient)
+    return l:recipients
+endfunction
+
 function! mail#strip_recipients(text)
     " Ensure there is no "To: "
     let l:text = a:text
@@ -74,15 +94,19 @@ function! mail#strip_recipients(text)
         let l:text = join(l:to_list, ': ')
     endif
     let l:recipients = []
-    let l:items = split(l:text, ',')
+    let l:items = mail#split_recipients(l:text)
     for l:item in l:items
         let l:address = matchstr(l:item, '\m<\zs\S*\ze>')
         if l:address =~ '\m^$'
             let l:address = l:item
             let l:name = split(l:address, '@')[0]
         else
-            let l:name = substitute(matchstr(l:item, '\m^\s*"\?\zs.*\ze<.*>'), '"\?\s*$', '', '')
+            let l:name = matchstr(l:item, '\m^\s*"\?\zs.*\ze<.*>')
         endif
+        let l:name = substitute(l:name, '\m^"\?\s*', '', '')
+        let l:name = substitute(l:name, '\m"\?\s*$', '', '')
+        let l:address = substitute(l:address, '\m^"\?\s*', '', '')
+        let l:address = substitute(l:address, '\m"\?\s*$', '', '')
         call add(l:recipients, {'name': l:name, 'address': l:address})
     endfor
     return l:recipients

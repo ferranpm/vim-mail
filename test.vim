@@ -28,6 +28,13 @@ function! TestStripRecipients()
                 \ { 'name': 'John Smith', 'address': 'smashjohn@gmail.com' }
                 \ ]
     call VUAssertEquals(mail#strip_recipients(l:quoted), l:quoted_expected)
+
+    let l:what = 'To: "Smith, John" <john.smith@atmel.com>, Juan Manches <juanmanches@thethings.io>'
+    let l:what_expected = [
+                \ {'name': 'Smith, John', 'address': 'john.smith@atmel.com' },
+                \ {'name': 'Juan Manches', 'address': 'juanmanches@thethings.io' }
+                \ ]
+    call VUAssertEquals(mail#strip_recipients(l:what), l:what_expected)
 endfunction
 
 function! TestJoinRecipients()
