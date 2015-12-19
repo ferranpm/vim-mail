@@ -191,7 +191,7 @@ function! mail#get_plain_text_text_plain(lines)
     if !has_key(l:headers, 'content-transfer-encoding')
         return mail#get_body(a:lines)
     endif
-    let l:content_transfer_encoding = l:headers['content-transfer-encoding']['misc'][0]
+    let l:content_transfer_encoding = l:headers['content-transfer-encoding']
     if l:content_transfer_encoding == 'quoted-printable' || l:content_transfer_encoding == 'q'
         return mail#decode_lines(mail#get_body(a:lines), 'qp')
     elseif l:content_transfer_encoding == 'base64' || l:content_transfer_encoding == 'b64'
