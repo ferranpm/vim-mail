@@ -197,6 +197,7 @@ function! mail#get_plain_text_text_plain(lines)
     elseif l:content_transfer_encoding == 'base64' || l:content_transfer_encoding == 'b64'
         return mail#decode_lines(mail#get_body(a:lines), 'b64')
     endif
+    return mail#get_body(a:lines)
 endfunction
 
 function! mail#get_plain_text_multipart_mixed(parts)
