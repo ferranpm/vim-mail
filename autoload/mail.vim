@@ -201,7 +201,17 @@ function! mail#get_plain_text_text_plain(lines)
 endfunction
 
 function! mail#get_plain_text_multipart_mixed(parts)
-    return 'TODO: mail#get_plain_text_multipart_mixed'
+    for l:part in a:parts
+        let l:headers = mail#parse_headers(l:part)
+        if !has_key(l:headers, 'content-type')
+            return 'mail#get_plain_text_multipart_mixed should not return this'
+        endif
+        let l:content_type = l:headers['content-type']['misc'][0]
+        if l:content_type == 'multipart/alternative'
+            return mail#get_plain_text_multipart_alternative(mail#get_parts(l:part))
+        endif
+    endfor
+    return 'mail#get_plain_text_multipart_mixed should not return this'
 endfunction
 
 function! mail#get_attachments(lines)
