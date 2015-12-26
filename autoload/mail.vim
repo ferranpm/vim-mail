@@ -37,7 +37,7 @@ function! mail#get_headers_lines(lines)
 endfunction
 
 function! mail#strip_header(key, header)
-    if a:key == 'content-type'
+    if a:key == 'content-type' || a:key == 'content-disposition'
         return mail#strip_key_value(a:header)
     elseif a:key == 'from' || a:key == 'to' || a:key == 'cc' || a:key == 'bcc'
         return mail#strip_recipients(a:header)
@@ -202,6 +202,23 @@ endfunction
 
 function! mail#get_plain_text_multipart_mixed(parts)
     return 'TODO: mail#get_plain_text_multipart_mixed'
+endfunction
+
+function! mail#get_attachments(lines)
+    let l:parts = mail#get_parts(a:lines)
+    let l:attachments = []
+    for l:part in l:parts
+        let l:headers = mail#parse_headers(l:part)
+        if !has_key(l:headers, 'content-disposition')
+            continue
+        endif
+        let l:attachment = {}
+        let l:attachment['name'] = l:headers['content-disposition']['filename']
+        " TODO: Decode depending on content-transfer-encoding
+        let l:attachment['content'] = mail#decode_lines(mail#get_body(l:part), 'b64')
+        call add(l:attachments, l:attachment)
+    endfor
+    return l:attachments
 endfunction
 
 function! mail#get_plain_text_multipart_alternative(parts)
