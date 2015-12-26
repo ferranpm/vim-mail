@@ -236,7 +236,6 @@ function! mail#get_plain_text_multipart_alternative(parts)
         let l:headers = mail#parse_headers(l:part)
         if !has_key(l:headers, 'content-type')
             return 'mail#get_plain_text_multipart_alternative should not return this'
-            return mail#get_body(l:part)
         endif
         let l:content_type = l:headers['content-type']['misc'][0]
         if l:content_type == 'text/plain'
