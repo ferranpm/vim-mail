@@ -87,12 +87,7 @@ endfunction
 
 function! mail#strip_recipients(text)
     " Ensure there is no "To: "
-    let l:text = a:text
-    let l:to_list = split(a:text, '\m:\s*')
-    if len(l:to_list) > 1
-        call remove(l:to_list, 0)
-        let l:text = join(l:to_list, ': ')
-    endif
+    let l:text = substitute(a:text, '\m^\s*\%(to:\|cc:\|bcc:\|from:\)\s*', '', '')
     let l:recipients = []
     let l:items = mail#split_recipients(l:text)
     for l:item in l:items

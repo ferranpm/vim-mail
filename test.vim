@@ -35,6 +35,11 @@ function! TestStripRecipients()
                 \ {'name': 'Juan Manches', 'address': 'juanmanches@thethings.io' }
                 \ ]
     call VUAssertEquals(mail#strip_recipients(l:what), l:what_expected)
+
+    let l:fails = 'CC: '
+    let l:fails_expected = []
+    call VUAssertEquals(mail#strip_recipients(l:fails), l:fails_expected)
+
 endfunction
 
 function! TestJoinRecipients()
